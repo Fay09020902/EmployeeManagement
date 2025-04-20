@@ -1,6 +1,8 @@
 const express = require('express');
 const User = require('../models/User');
 const router = express.Router();
+const auth = require('../middleware/auth')
+const isHR = require('../middleware/isHR')
 
 const {
   getAllEmployees,
@@ -8,7 +10,7 @@ const {
   getUserById,
   updateUserInfo,
   searchUsersByName
-} = require('../controllers/userController');
+} = require('../controllers/user');
 
 // const auth = require('../middlewares/auth');     // JWT auth middleware
 // const isHR = require('../middlewares/isHR');     // role check middleware (HR only)
@@ -25,6 +27,7 @@ router.get('/', async (req, res) => {
     }
 })
 
+
 // ✅ Get all employees (HR only)
 router.get('/', auth, isHR, getAllEmployees);
 
@@ -34,8 +37,8 @@ router.get('/me', auth, getCurrentUser);
 // ✅ Get one user by ID (HR only)
 router.get('/:id', auth, isHR, getUserById);
 
-// ✅ Update personal info (only self)
-router.put('/:id', auth, canEditSelf, updateUserInfo);
+// ✅ Update personal info
+router.put('/:id', auth, updateUserInfo);
 
 // // ✅ Update password
 // router.put('/:id/password', updatePassword); // You can add auth if not via reset token

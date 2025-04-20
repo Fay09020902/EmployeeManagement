@@ -3,49 +3,38 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const gravatar = require('gravatar');
 const User = require('../models/User');
+require('dotenv').config();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-// 🔵 HR: Send registration link via email
-exports.sendRegistrationEmail = async (req, res) => {
+const JWT_SECRET = process.env.JWT_SECRET;
+const AccessRequest = require('../models/AccessRequest');
+
+// Employee requests access → stored in DB
+exports.requestAccess = async (req, res) => {
   const { email } = req.body;
 
+  if (!email) {
+    return res.status(400).json({ message: 'Email are required' });
+  }
+
   try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already registered with this email' });
+    const exists = await AccessRequest.findOne({ email });
+
+    if (exists && exists.status === 'pending') {
+      return res.status(400).json({ message: 'You’ve already requested access. Please wait for HR to respond.' });
     }
 
-    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '3h' });
-    const link = `http://localhost:5000/register?token=${token}`;
+    const request = new AccessRequest({ email });
+    await request.save();
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PWD
-      }
-    });
-
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Complete Your Registration',
-      html: `
-        <h2>Welcome to the Company 🎉</h2>
-        <p>Click below to register. This link is valid for 3 hours.</p>
-        <a href="${link}">${link}</a>
-      `
-    };
-
-    await transporter.sendMail(mailOptions);
-    res.status(200).json({ message: 'Registration link sent successfully.' });
+    res.status(200).json({ message: 'Request submitted. Please wait for HR to respond.' });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Failed to send registration email' });
+    res.status(500).json({ message: 'Server error' });
   }
 };
+
+
 
 // 🟢 Frontend: Validate token before showing form
 exports.validateRegistrationToken = async (req, res) => {
