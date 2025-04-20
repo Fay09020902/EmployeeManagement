@@ -1,11 +1,13 @@
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-
+require('dotenv').config();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 const sendInviteEmail = async (email) => {
-  const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '3h' });
-  const link = `http://localhost:5000/register?token=${token}`;
+  const token = jwt.sign({ email }, JWT_SECRET);
+  //console.log("🔐 JWT_SECRET in use sendinvideemail:", process.env.JWT_SECRET);
+
+  const link = `http://localhost:5173/register?token=${token}`;
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',

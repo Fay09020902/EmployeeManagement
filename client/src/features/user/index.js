@@ -1,4 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { makeHTTPPOSTRequest } from '../../services/api';
+
 const initialState = {
     token: null,
     loading: false,
@@ -86,37 +88,25 @@ const userSlice = createSlice({
 
 })
 
-export const createUserAsync = createAsyncThunk(
-    'user/createUser',
-    async (userData, {rejectWithValue}) => {
-        try {
-            const res = await fetch("http://localhost:5400/api/users", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(userData),
-              });
-            if (!res.ok) {
-                const data = await res.json();
-                return rejectWithValue(data.message)
-            }
-            const data = await res.json();
-            return data;
-        } catch(e){
-            return rejectWithValue(e.message);// the rejected case in the slice will handle the error when the action is rejected
-            //always return a resolved value
-        }
-    }
-)
 
+export const createUserAsync = createAsyncThunk(
+  'user/createUser',
+  async ({ values, token }, { rejectWithValue }) => {
+    try {
+      const data = await makeHTTPPOSTRequest('register', values, token);
+      return data;
+    } catch (e) {
+      return rejectWithValue(e.message);
+    }
+  }
+);
 
 export const loginUser = createAsyncThunk(
     'user/login',
     async ({ email, password }, {rejectWithValue}) => {
         try {
           // console.log('Email, password',email, password);
-            const res = await fetch("http://localhost:5400/api/login", {
+            const res = await fetch("http://localhost:5000/api/login", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -139,7 +129,7 @@ export const updatePassword = createAsyncThunk(
   async({userId, newPassword}, {rejectWithValue})=>{
     try{
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5400/api/users/${userId}`,{
+      const res = await fetch(`http://localhost:5000/api/users/${userId}`,{
         method:'PUT',
         headers:{
           'Content-Type':'application/json',
@@ -162,7 +152,7 @@ export const sendResetEmail = createAsyncThunk(
   'user/sendResetEmail',
   async (email, {rejectWithValue}) => {
       try {
-          const res = await fetch("http://localhost:5400/api/users/reset-password", {
+          const res = await fetch("http://localhost:5000/api/users/reset-password", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",

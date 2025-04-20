@@ -5,12 +5,16 @@ const userRouter = require('./routes/user');
 const hrRouter = require('./routes/hr')
 const auth = require('./routes/auth')
 
+
 require('dotenv').config();
 const app = express();
 const port = 5000;
 
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 db()
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());

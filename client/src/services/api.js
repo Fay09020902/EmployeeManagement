@@ -1,4 +1,4 @@
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = 'http://localhost:5000/api/'
 
 export function makeHTTPGETRequest(endpoint, queryParams ={}){
     const token = localStorage.getItem('token');
@@ -17,8 +17,8 @@ export function makeHTTPGETRequest(endpoint, queryParams ={}){
     })
 }
 
-export function makeHTTPPOSTRequest(endpoint, bodyParams={}){
-    const token = localStorage.getItem('token');
+export function makeHTTPPOSTRequest(endpoint, bodyParams={}, tokenOverride = null){
+    const token = tokenOverride || localStorage.getItem('token');
     const url = new URL(API_URL + endpoint);
     console.log(`POST Request to ${url}`, token);
     const headers = new Headers({
@@ -96,4 +96,3 @@ export function makeHTTPDELETERequest(endpoint, queryParams ={}){
             throw error;
         })
 }
-

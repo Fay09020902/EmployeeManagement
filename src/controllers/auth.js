@@ -14,48 +14,78 @@ exports.requestAccess = async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
-    return res.status(400).json({ message: 'Email are required' });
+    return res.status(400).json({ message: 'Email is required' });
   }
 
   try {
-    const exists = await AccessRequest.findOne({ email });
-
-    if (exists && exists.status === 'pending') {
-      return res.status(400).json({ message: 'You’ve already requested access. Please wait for HR to respond.' });
+    // Check if user already registered
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already registered with this email.' });
     }
 
+    const existingRequest = await AccessRequest.findOne({ email });
+
+    if (existingRequest) {
+      if (existingRequest.status === 'pending') {
+        return res.status(400).json({ message: 'You’ve already requested access. Please wait for HR to respond.' });
+      }
+
+      // If previously approved but not yet registered, update timestamp
+      existingRequest.status = 'pending';
+      existingRequest.createdAt = new Date(); // update timestamp
+      await existingRequest.save();
+
+      return res.status(200).json({ message: 'Request re-submitted. Please wait for HR to respond.' });
+    }
+
+    // No request found → create a new one
     const request = new AccessRequest({ email });
     await request.save();
 
     res.status(200).json({ message: 'Request submitted. Please wait for HR to respond.' });
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
 
 
+
 // 🟢 Frontend: Validate token before showing form
 exports.validateRegistrationToken = async (req, res) => {
-  const { token } = req.body;
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1]; // Get token after "Bearer "
 
+  //console.log('📨 Received token:', token);
+
+  if (!token) {
+    return res.status(400).json({ message: 'Token is missing from header' });
+  }
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     res.status(200).json({ email: decoded.email });
   } catch (err) {
+    console.error('❌ Token verification error:', err);
     const msg = err.name === 'TokenExpiredError' ? 'Link expired' : 'Invalid token';
     res.status(400).json({ message: msg });
   }
 };
 
+
 // 🟢 Register user using token
 exports.registerUser = async (req, res) => {
-  const { token, username, password } = req.body;
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
 
+  const { username, password } = req.body;
+ // console.log("register user controller: token ", token, username)
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     const email = decoded.email;
+    //console.log("email: ,", email)
 
     const exists = await User.findOne({ email });
     if (exists) return res.status(400).json({ message: 'User already registered' });
@@ -98,7 +128,7 @@ exports.loginUser = async (req, res) => {
       }
     };
 
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(payload, JWT_SECRET);
 
     res.status(200).json({
       token,
