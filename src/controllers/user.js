@@ -1,5 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const sendInviteEmail = require('../utils/sendInviteEmail')
+const jwt = require('jsonwebtoken');
 
 // ✅ GET /api/users (HR only)
 exports.getAllEmployees = async (req, res) => {
@@ -56,23 +58,28 @@ exports.updateUserInfo = async (req, res) => {
   }
 };
 
-// ✅ PUT /api/users/:id/password
+// ✅ POST /api/users/update-password
 exports.updatePassword = async (req, res) => {
   try {
-    const { newPassword } = req.body;
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) {
+      return res.status(400).json({ message: `Token and new password are required.${token}, ${newPassword}` });
+    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const email = decoded.email;
 
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
     await user.save();
-
     res.status(200).json({ message: 'Password updated successfully' });
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: `Server error${req.body.password}, ${err}` });
   }
 };
+
 
 // ✅ DELETE /api/users/:id (HR/Admin only)
 exports.deleteUser = async (req, res) => {
@@ -107,3 +114,17 @@ exports.searchUsersByName = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+//set reset password email
+exports.sendResetEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const exists = await User.findOne({ email });
+    if (!exists) return res.status(400).json({ message: 'User not registered' });
+    // Send reset password email
+    const rslt = await sendInviteEmail(email, reset = true);
+    res.status(200).json(rslt)
+  } catch (err) {
+    res.status(500).json({  message: 'Failed to send reset password email.', error: err.message });
+  }
+}

@@ -58,29 +58,29 @@ const userSlice = createSlice({
             state.loading = false;
             state.error = action.payload || action.error.message;
           })
-          .addCase(updatePassword.pending, (state) => {
+          .addCase(updatePasswordThunk.pending, (state) => {
             state.loading = true;
             state.error = null;
           })
-          .addCase(updatePassword.fulfilled, (state, action) => {
+          .addCase(updatePasswordThunk.fulfilled, (state, action) => {
             state.loading = false;
             state.currentUser = action.payload; // update user info in store
             state.error = null;
           })
-          .addCase(updatePassword.rejected, (state, action) => {
+          .addCase(updatePasswordThunk.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload || action.error.message;
           })
-          .addCase(sendResetEmail.pending, (state) => {
+          .addCase(sendResetEmailThunk.pending, (state) => {
             state.loading = true;
             state.error = null;
           })
-          .addCase(sendResetEmail.fulfilled, (state, action) => {
+          .addCase(sendResetEmailThunk.fulfilled, (state, action) => {
             state.loading = false;
             state.currentUser = action.payload; // update user info in store
             state.error = null;
           })
-          .addCase(sendResetEmail.rejected, (state, action) => {
+          .addCase(sendResetEmailThunk.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload || action.error.message;
           });
@@ -124,18 +124,16 @@ export const loginUser = createAsyncThunk(
     }
 )
 
-export const updatePassword = createAsyncThunk(
+export const updatePasswordThunk = createAsyncThunk(
   'user/updatePassword',
-  async({userId, newPassword}, {rejectWithValue})=>{
+  async({token, password}, {rejectWithValue})=>{
     try{
-      const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5000/api/users/${userId}`,{
-        method:'PUT',
+      const res = await fetch(`http://localhost:5000/api/users/update-password`,{
+        method:'POST',
         headers:{
           'Content-Type':'application/json',
-          'x-auth-token':token
         },
-        body:JSON.stringify({password: newPassword})
+        body:JSON.stringify({ token, newPassword: password})
       });
       const data = await res.json();
       if(!res.ok){
@@ -148,7 +146,7 @@ export const updatePassword = createAsyncThunk(
   }
 )
 
-export const sendResetEmail = createAsyncThunk(
+export const sendResetEmailThunk = createAsyncThunk(
   'user/sendResetEmail',
   async (email, {rejectWithValue}) => {
       try {

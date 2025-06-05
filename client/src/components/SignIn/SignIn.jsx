@@ -4,23 +4,23 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Form, Input, Button, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { loginUser, clearError } from '../../features/user';
-import { CardContainer } from '../../common/QuantityControl'
+import { CardContainer, AuthContainer } from '../../common/QuantityControl'
 
 import styled from '@emotion/styled';
 
 const { Title } = Typography;
 
-const AuthContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background-color: #f7f7f7;
-  border-radius: 10px;
-  max-width: 400px;
-  margin: 0 auto;
-`;
+// const AuthContainer = styled.div`
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   justify-content: center;
+//   padding: 20px;
+//   background-color: #f7f7f7;
+//   border-radius: 10px;
+//   max-width: 400px;
+//   margin: 0 auto;
+// `;
 
 const StyledForm = styled(Form)`
   width: 300px;

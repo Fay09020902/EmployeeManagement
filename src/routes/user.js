@@ -9,7 +9,9 @@ const {
   getCurrentUser,
   getUserById,
   updateUserInfo,
-  searchUsersByName
+  searchUsersByName,
+  sendResetEmail,
+  updatePassword
 } = require('../controllers/user');
 
 // const auth = require('../middlewares/auth');     // JWT auth middleware
@@ -40,9 +42,11 @@ router.get('/:id', auth, isHR, getUserById);
 // ✅ Update personal info
 router.put('/:id', auth, updateUserInfo);
 
-// // ✅ Update password
-// router.put('/:id/password', updatePassword); // You can add auth if not via reset token
+//✅ send password
+router.post('/reset-password', sendResetEmail);
 
+//✅ update password
+router.post('/update-password', updatePassword);
 
 // ✅ Search user by name (HR only)
 router.get('/search/name', auth, isHR, searchUsersByName);

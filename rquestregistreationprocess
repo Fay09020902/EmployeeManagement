@@ -1,6 +1,8 @@
 1.user post a request access
 
 POST api/request-access
+if new user, write into AccessRequest table
+if alreay i user table means user already registered, no register email sent needed.
 
 
 2.HR approveAccessRequest and send email
