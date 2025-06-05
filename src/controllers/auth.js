@@ -31,7 +31,7 @@ exports.requestAccess = async (req, res) => {
         return res.status(400).json({ message: 'You’ve already requested access. Please wait for HR to respond.' });
       }
 
-      // If previously approved but not yet registered, update timestamp
+      // If previously approved or rejected but not yet registered, update timestamp
       existingRequest.status = 'pending';
       existingRequest.createdAt = new Date(); // update timestamp
       await existingRequest.save();

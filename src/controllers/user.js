@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const sendInviteEmail = require('../utils/sendInviteEmail')
 
 // ✅ GET /api/users (HR only)
 exports.getAllEmployees = async (req, res) => {
@@ -107,3 +108,17 @@ exports.searchUsersByName = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+//set reset password email
+exports.sendResetEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const exists = await User.findOne({ email });
+    if (!exists) return res.status(400).json({ message: 'User not registered' });
+    // Send reset password email
+    const rslt = await sendInviteEmail(email, reset = true);
+    res.status(200).json(rslt)
+  } catch (err) {
+    res.status(500).json({  message: 'Failed to send reset password email.', error: err.message });
+  }
+}

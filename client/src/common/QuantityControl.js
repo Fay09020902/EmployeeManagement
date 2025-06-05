@@ -10,3 +10,15 @@ export const CardContainer = styled.div`
 
   background-color: #f0f2f5; /* Optional: light background */
 `;
+
+export const AuthContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: #f7f7f7;
+  border-radius: 10px;
+  max-width: 400px;
+  margin: 0 auto;
+`;

@@ -71,16 +71,16 @@ const userSlice = createSlice({
             state.loading = false;
             state.error = action.payload || action.error.message;
           })
-          .addCase(sendResetEmail.pending, (state) => {
+          .addCase(sendResetEmailThunk.pending, (state) => {
             state.loading = true;
             state.error = null;
           })
-          .addCase(sendResetEmail.fulfilled, (state, action) => {
+          .addCase(sendResetEmailThunk.fulfilled, (state, action) => {
             state.loading = false;
             state.currentUser = action.payload; // update user info in store
             state.error = null;
           })
-          .addCase(sendResetEmail.rejected, (state, action) => {
+          .addCase(sendResetEmailThunk.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload || action.error.message;
           });
@@ -148,7 +148,7 @@ export const updatePassword = createAsyncThunk(
   }
 )
 
-export const sendResetEmail = createAsyncThunk(
+export const sendResetEmailThunk = createAsyncThunk(
   'user/sendResetEmail',
   async (email, {rejectWithValue}) => {
       try {
@@ -164,6 +164,7 @@ export const sendResetEmail = createAsyncThunk(
               return rejectWithValue(data.message)
           }
           const data = await res.json();
+          console.log("data retrn from backend: ", data)
           return data;
       } catch(e){
           return rejectWithValue(e.message);
