@@ -2,6 +2,8 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const sendInviteEmail = require('../utils/sendInviteEmail')
 const jwt = require('jsonwebtoken');
+const RegistrationInvite = require('../models/RegistrationInvite')
+
 
 // ✅ GET /api/users (HR only)
 exports.getAllEmployees = async (req, res) => {
@@ -32,6 +34,34 @@ exports.getUserById = async (req, res) => {
     res.status(200).json(user);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+//register user
+
+exports.registerUser = async (req, res) => {
+  const { username, password, email, token } = req.body;
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    if (payload.email !== email) return res.status(400).json({ message: 'Invalid token or email mismatch' });
+
+    const invite = await RegistrationInvite.findOne({ email });
+    if (!invite || invite.status !== 'invited') {
+      return res.status(400).json({ message: 'No valid invite found' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({ username, email, password: hashedPassword });
+    await user.save();
+
+    invite.status = 'registered';
+    await invite.save();
+
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (err) {
+    // console.error(err);
+    res.status(400).json({ message: err.errmsg });
   }
 };
 

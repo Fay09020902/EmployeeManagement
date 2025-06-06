@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { Form, Input, Button, Typography } from 'antd';
@@ -9,18 +9,6 @@ import { CardContainer, AuthContainer } from '../../common/QuantityControl'
 import styled from '@emotion/styled';
 
 const { Title } = Typography;
-
-// const AuthContainer = styled.div`
-//   display: flex;
-//   flex-direction: column;
-//   align-items: center;
-//   justify-content: center;
-//   padding: 20px;
-//   background-color: #f7f7f7;
-//   border-radius: 10px;
-//   max-width: 400px;
-//   margin: 0 auto;
-// `;
 
 const StyledForm = styled(Form)`
   width: 300px;
@@ -43,7 +31,7 @@ const ResponsiveFooter = styled.div`
 `;
 
 const SignIn = () => {
-  const { error, isAuthenticated } = useSelector((state) => state.user);
+  const { error, isAuthenticated, isAdmin } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -52,8 +40,13 @@ const SignIn = () => {
   }, [dispatch]);
 
   useEffect(() => {
+
     if (isAuthenticated) {
-      navigate("/");
+      if(isAdmin) {
+        navigate('/hr/dashboard');
+      } else {
+        navigate("/");
+      }
     }
   }, [isAuthenticated, navigate]);
 
@@ -99,9 +92,6 @@ const SignIn = () => {
           </Form.Item>
 
           <ResponsiveFooter>
-            <p>
-              Don't have an account? <a href="/register">Register</a>
-            </p>
             <p>
               <a href="/forget-password">Forgot Password?</a>
             </p>

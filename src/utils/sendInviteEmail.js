@@ -19,7 +19,7 @@ const sendInviteEmail = async (email, reset = false) => {
       <a href="${link}">${link}</a>
     `
   : `
-      <h2>You're Invited 🎉</h2>
+      <h2>Complete Your Registration 🎉</h2>
       <p>Click below to complete your registration. This link is valid for 3 hours.</p>
       <a href="${link}">${link}</a>
     `;

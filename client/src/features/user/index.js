@@ -6,8 +6,8 @@ const initialState = {
     loading: false,
     currentUser: null,
     isAuthenticated: false,
+    isAdmin: false,
     error: null,
-    cart: []
 };
 
 const userSlice = createSlice({
@@ -40,6 +40,7 @@ const userSlice = createSlice({
             state.loading = false;
             state.currentUser = action.payload.user;
             state.isAuthenticated = true;
+            state.isAdmin = action.payload.user.isAdmin;
             state.error = null;
           })
           .addCase(loginUser.rejected, (state, action) => {

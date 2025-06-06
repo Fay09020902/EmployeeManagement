@@ -4,13 +4,18 @@ const auth = require('../middleware/auth');
 const isHR = require('../middleware/isHR');
 
 const {
-  getAccessRequests,
-  approveAccessRequest,
-  rejectAccessRequest
+  getInvitesHistory,
+  sendRegistrationLink,
+  rejectAccessRequest,
 } = require('../controllers/hr');
 
-router.get('/access-requests', auth, isHR, getAccessRequests);
-router.put('/access-requests/:id/approve', auth, isHR, approveAccessRequest);
-router.put('/access-requests/:id/reject', auth, isHR, rejectAccessRequest);
+
+// GET /api/hr/invites - HR only
+router.get('/invites', auth, isHR, getInvitesHistory);
+
+//POST /api/hr/send-invite - HR only
+router.post('/send-invite', auth, isHR, sendRegistrationLink)
+// router.put('/access-requests/:id/approve', auth, isHR, approveAccessRequest);
+// router.put('/access-requests/:id/reject', auth, isHR, rejectAccessRequest);
 
 module.exports = router;

@@ -1,51 +1,63 @@
 const AccessRequest = require('../models/AccessRequest');
 const sendInviteEmail = require('../utils/sendInviteEmail');
 const User = require('../models/User');
+const RegistrationInvite = require('../models/RegistrationInvite')
 
 
 // ✅ HR can view all access requests (pending, approved, rejected)
-exports.getAccessRequests = async (req, res) => {
+exports.getInvitesHistory = async (req, res) => {
     try {
-      const requests = await AccessRequest.find().sort({ createdAt: -1 });
+      const requests = await RegistrationInvite.find().sort({ createdAt: -1 });
       res.status(200).json(requests);
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: 'Failed to fetch access requests' });
+      res.status(500).json({ message: 'Failed to fetch invitation history' });
     }
   };
 
 
 
-  exports.approveAccessRequest = async (req, res) => {
-    const { id } = req.params;
+  exports.sendRegistrationLink = async (req, res) => {
+    const { name, email } = req.body;
 
     try {
-      const request = await AccessRequest.findById(id);
-      if (!request) return res.status(404).json({ message: 'Request not found' });
+      // const request = await AccessRequest.findEmail(email);
+      // if (!request) return res.status(404).json({ message: 'Request not found' });
 
       // Check if the user is already registered
-      const existingUser = await User.findOne({ email: request.email });
+      const existingUser = await User.findOne({ email });
       if (existingUser) {
         return res.status(400).json({ message: 'User already registered with this email.' });
       }
 
       // Send or resend the invite
-      await sendInviteEmail(request.email);
+      const token = await sendInviteEmail(email, false);
 
-      // Mark as approved (if not already)
-      if (request.status !== 'approved') {
-        request.status = 'approved';
-        await request.save();
-      }
+      // Store or update invite
+      await RegistrationInvite.findOneAndUpdate(
+        { email },
+        {
+          name,
+          email,
+          token,
+          status: 'invited',
+        },
+        { upsert: true, new: true }
+      );
+
+      // // Mark as approved (if not already)
+      // if (request.status !== 'approved') {
+      //   request.status = 'approved';
+      //   await request.save();
+      // }
 
       res.status(200).json({
-        message: 'Registration email sent.',
-        info: request.status === 'approved' ? 'Resent invite.' : 'Approved and sent invite.'
+        message: 'Registration email sent.'
       });
 
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: 'Failed to approve or send invite email.' });
+      res.status(500).json({ message: 'Failed to send invite email.' });
     }
   };
 

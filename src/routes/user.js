@@ -5,6 +5,7 @@ const auth = require('../middleware/auth')
 const isHR = require('../middleware/isHR')
 
 const {
+registerUser,
   getAllEmployees,
   getCurrentUser,
   getUserById,
@@ -29,6 +30,8 @@ router.get('/', async (req, res) => {
     }
 })
 
+// Register with token
+router.post('/register', registerUser);
 
 // ✅ Get all employees (HR only)
 router.get('/', auth, isHR, getAllEmployees);

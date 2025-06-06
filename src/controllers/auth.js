@@ -59,7 +59,7 @@ exports.validateRegistrationToken = async (req, res) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1]; // Get token after "Bearer "
 
-  //console.log('📨 Received token:', token);
+  console.log('📨 Received token:', token);
 
   if (!token) {
     return res.status(400).json({ message: 'Token is missing from header' });

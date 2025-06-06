@@ -4,6 +4,8 @@ import RegisterWithToken from "./components/Register/RegisterForm"; // adjust pa
 import SignIn from "./components/SignIn/SignIn";
 import UpdatePassword from "./components/SignIn/UpdatePassword";
 import ForgetPassword from "./components/SignIn/ForgotPassword";
+import Layout from "./components/Layout";
+import HRDashboard from "./components/HRDashboard/HRDashboard";
 
 function App() {
   useEffect(() => {
@@ -14,11 +16,14 @@ function App() {
 
   return (
       <Routes>
+        <Route element={<Layout />}>
         <Route path="/" element={<div>Hello</div>} />
-        <Route path="/register" element={<RegisterWithToken />} />
+        <Route path="/register/:token" element={<RegisterWithToken />} />
         <Route path='/signin' element={<SignIn />} />
+        <Route path='/hr/dashboard' element={<HRDashboard />} />
         <Route path="/forget-password" element={<ForgetPassword />} />
         <Route path='/update-password/:token' element={<UpdatePassword />} />
+        </Route>
       </Routes>
   );
 }

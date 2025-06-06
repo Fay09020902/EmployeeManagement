@@ -15,3 +15,8 @@ genrate a link which generate from email with signature
 use link to get to frontend route with token in params
 when render this link, it will post to
 http://localhost:5000/api/validate-token to validate the token validateRegistrationToken
+
+
+1. HT send invitation link through invatation form
+2. user receive link and got to register
+

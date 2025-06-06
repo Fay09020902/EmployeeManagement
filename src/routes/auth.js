@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const {
   validateRegistrationToken,
-  registerUser,
   loginUser,
   requestAccess
 } = require('../controllers/auth');
@@ -12,9 +11,6 @@ router.post('/request-access', requestAccess);
 
 // Validate token before showing form
 router.post('/validate-token', validateRegistrationToken);
-
-// Register with token
-router.post('/register', registerUser);
 
 // Login
 router.post('/login', loginUser);
