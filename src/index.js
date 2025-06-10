@@ -3,6 +3,7 @@ const cors = require('cors')
 const db = require('./config/db')
 const userRouter = require('./routes/user');
 const hrRouter = require('./routes/hr')
+const employeeRouter = require('./routes/employee')
 const auth = require('./routes/auth')
 
 
@@ -22,7 +23,7 @@ app.use(express.json());
 app.use('/api', auth);
 app.use('/api/users', userRouter);
 app.use('/api/hr', hrRouter);
-// app.use('/api/orders', orderRouter);
+app.use('/api/employee', employeeRouter);
 // app.use('/api/carts', cartRouter)
 
 

@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Form, Input, Button, Typography, message, Card } from 'antd';
 import styled from '@emotion/styled';
-// import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setCurrentUser } from '../../features/user'
 // import { CardContainer } from '../../common/QuantityControl'
 // import { makeHTTPPOSTRequest } from '../../services/api';
 // import {createUserAsync, clearError} from '../../features/user'
@@ -28,6 +29,7 @@ const StyledForm = styled(Form)`
 
 const RegisterWithToken = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { token } = useParams();
   const [err, setErr] = useState(null)
   const [email, setEmail] = useState('');
@@ -60,6 +62,11 @@ const RegisterWithToken = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
+      // const storedUser = localStorage.getItem('user');
+      //     if (storedUser) {
+      //       // const parsedUser = JSON.parse(storedUser);
+      //       dispatch(setCurrentUser(JSON.parse(storedUser) ));
+      //     }
       message.success('Registration successful!');
       navigate('/signin');
     } catch (err) {
