@@ -1,10 +1,11 @@
 const AccessRequest = require('../models/AccessRequest');
 const sendInviteEmail = require('../utils/sendInviteEmail');
 const User = require('../models/User');
+const EmployeeProfile = require('../models/EmployeeProfile');
 const RegistrationInvite = require('../models/RegistrationInvite')
 
 
-// ✅ HR can view all access requests (pending, approved, rejected)
+// HR can view all access requests (pending, approved, rejected)
 exports.getInvitesHistory = async (req, res) => {
     try {
       const requests = await RegistrationInvite.find().sort({ createdAt: -1 });
@@ -15,6 +16,29 @@ exports.getInvitesHistory = async (req, res) => {
     }
   };
 
+
+exports.getAllEmployeeProfiles = async (req, res) => {
+  try {
+    const profiles = await EmployeeProfile.find()
+      .populate('userId', 'email onboardingStatus')
+      .lean();
+
+    res.status(200).json({ employees: profiles });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to fetch employee profiles.' });
+  }
+};
+
+exports.getEmployeeProfileById = async (req, res) => {
+  try {
+    const profile = await EmployeeProfile.findOne({ userId: req.params.id }).populate('userId');
+    if (!profile) return res.status(404).json({ message: 'Employee not found' });
+    res.json({ profile });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch employee.' });
+  }
+};
 
 
   exports.sendRegistrationLink = async (req, res) => {
@@ -44,12 +68,6 @@ exports.getInvitesHistory = async (req, res) => {
         },
         { upsert: true, new: true }
       );
-
-      // // Mark as approved (if not already)
-      // if (request.status !== 'approved') {
-      //   request.status = 'approved';
-      //   await request.save();
-      // }
 
       res.status(200).json({
         message: 'Registration email sent.'
@@ -82,3 +100,4 @@ exports.getInvitesHistory = async (req, res) => {
       res.status(500).json({ message: 'Failed to reject request' });
     }
   };
+

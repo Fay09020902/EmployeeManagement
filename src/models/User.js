@@ -16,6 +16,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     enum: ['Unsubmitted', 'Pending', 'Approved', 'Rejected'],
     default: 'Unsubmitted'
+  },
+  feedback: {
+    type: String,
+    default: ''
   }
 }, { timestamps: true });
 
