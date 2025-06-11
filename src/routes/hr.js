@@ -15,6 +15,8 @@ router.get('/invites', auth, isHR, getInvitesHistory);
 
 //POST /api/hr/send-invite - HR only
 router.post('/send-invite', auth, isHR, sendRegistrationLink)
+
+
 // router.put('/access-requests/:id/approve', auth, isHR, approveAccessRequest);
 // router.put('/access-requests/:id/reject', auth, isHR, rejectAccessRequest);
 

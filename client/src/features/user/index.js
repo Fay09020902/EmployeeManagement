@@ -7,6 +7,7 @@ const initialState = {
     currentUser: null,
     isAuthenticated: false,
     isAdmin: false,
+    onboardingStatus: null,
     error: null,
 };
 
@@ -26,6 +27,12 @@ const userSlice = createSlice({
         },
         clearError: (state) => {
           state.error = null;
+        },
+        setOnboardingStatus: (state, action) => {
+          state.onboardingStatus = action.payload;
+          if (state.currentUser) {
+            state.currentUser.onboardingStatus = action.payload;
+          }
         }
     },
     extraReducers: (builder) => {
@@ -41,6 +48,7 @@ const userSlice = createSlice({
             state.currentUser = action.payload.user;
             state.isAuthenticated = true;
             state.isAdmin = action.payload.user.isAdmin;
+            state.onboardingStatus = action.payload.user.onboardingStatus;
             state.error = null;
           })
           .addCase(loginUser.rejected, (state, action) => {
@@ -172,4 +180,4 @@ export const sendResetEmailThunk = createAsyncThunk(
 
 
 export const userReducer = userSlice.reducer
-export const {setCurrentUser, clearUser, clearError} = userSlice.actions
+export const {setCurrentUser, clearUser, clearError, setOnboardingStatus} = userSlice.actions

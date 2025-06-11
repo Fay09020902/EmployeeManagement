@@ -34,12 +34,15 @@ const EmployeeProfileSchema = new mongoose.Schema({
     visaType: { type: String, enum: ['H1-B', 'L2', 'F1(CPT/OPT)', 'H4', 'Other'] },
     otherVisaTitle: String,
     startDate: Date,
-    endDate: Date,
-    documents: [{
-      name: String,
-      url: String
-    }]
+    endDate: Date
   },
+  
+  documents: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Document',
+    }
+  ],
 
   reference: {
     firstName: String,
@@ -60,15 +63,6 @@ const EmployeeProfileSchema = new mongoose.Schema({
       relationship: String
     }
   ],
-
-  onboarding: {
-    status: {
-      type: String,
-      enum: ['Unsubmitted', 'Pending', 'Approved', 'Rejected'],
-      default: 'Unsubmitted'
-    },
-    feedback: String
-  },
 
   createdAt: {
     type: Date,

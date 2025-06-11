@@ -15,15 +15,12 @@ function App() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // fetch('http://localhost:5000/api')
-    //   .then(res => res.json())
-    //   .then(data => console.log(data));
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    console.log("setCurrent user in App")
+
     if (token && storedUser) {
-      // const parsedUser = JSON.parse(storedUser);
-      dispatch(setCurrentUser(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      dispatch(setCurrentUser(parsedUser));
     }
     setIsLoaded(true)
   }, [dispatch]);

@@ -5,7 +5,7 @@ const userRouter = require('./routes/user');
 const hrRouter = require('./routes/hr')
 const employeeRouter = require('./routes/employee')
 const auth = require('./routes/auth')
-
+const documentRouter = require('./routes/documents')
 
 require('dotenv').config();
 const app = express();
@@ -24,7 +24,7 @@ app.use('/api', auth);
 app.use('/api/users', userRouter);
 app.use('/api/hr', hrRouter);
 app.use('/api/employee', employeeRouter);
-// app.use('/api/carts', cartRouter)
+app.use('/api/documents', documentRouter)
 
 
 app.listen(port, () => {

@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Form, Input, Select, Button, Typography, DatePicker, Checkbox, Card, Upload, message } from 'antd';
+import { Form, Alert, Input, Select, Button, Typography, DatePicker, Checkbox, Card, Upload, message, Space } from 'antd';
 import styled from '@emotion/styled';
+import axios from "axios";
 import { UploadOutlined } from '@ant-design/icons';
+import {setOnboardingStatus} from '../features/user'
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -18,50 +20,90 @@ const OnboardingForm = () => {
   const [isCitizen, setIsCitizen] = useState(null);
   const [visaType, setVisaType] = useState('');
   const [optReceipt, setOptReceipt] = useState(null);
+  const [uploadedDocuments, setUploadedDocuments] = useState([]);
   const [profilePicture, setProfilePicture] = useState(null);
   const [err, setErr] = useState(null);
-  const currentUser = useSelector(state => state.user.currentUser)
-  const user = useSelector(state => state.user);
-console.log("Redux user state:", user);
-
+  const currentUser = useSelector(state => state.user.currentUser);
+  const token = localStorage.getItem('token');
+  const onboardingStatus = currentUser?.onboardingStatus;
   const email = currentUser?.email;
-  console.log(email)
+  const isPending = onboardingStatus === 'Pending'
 
-  const onFinish = async (values) => {
-    if (!profilePicture) {
-      message.error('Please upload a profile picture.');
-      return;
-    }
-    if (visaType === 'F1(CPT/OPT)' && !optReceipt) {
-      message.error('Please upload OPT Receipt before submitting.');
-      return;
-    }
+
+const dispatch = useDispatch();
+
+    const handleOptUpload = async (file) => {
+    if (!file || !token) return;
+    console.log('Uploading file:', file);
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', 'opt_receipt');
+    formData.append('userId', currentUser.id);
 
     try {
-      const formData = new FormData();
-      formData.append('formValues', JSON.stringify(values));
-      formData.append('profilePicture', profilePicture);
-      if (optReceipt) formData.append('optReceipt', optReceipt);
-
-      const res = await fetch('http://localhost:5000/api/employee/profile', {
-        method: 'POST',
-        body: formData
+      const res = await axios.post('http://localhost:5000/api/documents/upload', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
-      if (!res.ok) {
-        const { message: errMsg } = await res.json();
-        throw new Error(errMsg || 'Failed to submit onboarding form.');
-      }
 
-      message.success('Onboarding form submitted successfully.');
+      const uploaded = res.data.document;
+    setUploadedDocuments((prev) => [...prev, uploaded._id]);
+    setOptReceipt(uploaded.fileUrl);
+    message.success('OPT Receipt uploaded successfully');
     } catch (err) {
-      setErr(err);
-      message.error(err.message || 'Submission failed.');
+      console.error('OPT Upload failed', err);
     }
   };
 
+  const onFinish = async (values) => {
+  if (visaType === 'F1(CPT/OPT)' && !optReceipt) {
+    message.error('Please upload OPT Receipt before submitting.');
+    return;
+  }
+
+  try {
+    const payload = {
+      ...values,
+      profilePictue: profilePicture,
+      //documents: uploadedDocuments, // store only IDs of uploaded docs (optional)
+    };
+
+    const res = await fetch('http://localhost:5000/api/employee/profile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const { message: errMsg } = await res.json();
+      throw new Error(errMsg || 'Failed to submit onboarding form.');
+    }
+    dispatch(setOnboardingStatus("Pending"));
+
+    const updatedUser = { ...currentUser, onboardingStatus: 'Pending' };
+localStorage.setItem('user', JSON.stringify(updatedUser));
+
+    message.success('Onboarding form submitted successfully.');
+  } catch (err) {
+    setErr(err);
+    message.error(err.message || 'Submission failed.');
+  }
+};
+
   return (
-    <Form layout="vertical" form={form} onFinish={onFinish}>
+    <Form layout="vertical" form={form} onFinish={onFinish} disabled={isPending}>
+      {isPending && (<Alert
+  message="Profile Submitted"
+  description="Your onboarding profile has been submitted successfully and is awaiting HR approval."
+  type="success"
+  showIcon
+/>)}
       <Title level={4}>Basic Info</Title>
       <Form.Item label="Upload Profile Picture (URL)" required>
     <Input
@@ -89,7 +131,17 @@ console.log("Redux user state:", user);
 
       <Title level={4}>Personal</Title>
       <Form.Item name="dob" label="Date of Birth" rules={[{ required: true }]}><DatePicker style={{ width: '100%' }} /></Form.Item>
-      <Form.Item name="gender" label="Gender" rules={[{ required: true }]}> <Select> <Option value="male">Male</Option> <Option value="female">Female</Option> <Option value="prefer not to say">Prefer not to say</Option> </Select> </Form.Item>
+      <Form.Item
+  name="gender"
+  label="Gender"
+  rules={[{ required: true, message: 'Please select your gender' }]}
+>
+  <Select placeholder="Select gender">
+    <Option value="male">Male</Option>
+    <Option value="female">Female</Option>
+    <Option value="prefer not to say">Prefer not to say</Option>
+  </Select>
+</Form.Item>
       <Form.Item name="ssn" label="SSN" rules={[{ required: true }]}><Input /></Form.Item>
 
       <Title level={4}>Visa</Title>
@@ -107,10 +159,10 @@ console.log("Redux user state:", user);
       {isCitizen === 'yes' ? (
         <SubInput>
           <Form.Item name={["visa", "citizenType"]} label="Citizen Type">
-            <Checkbox.Group>
-              <Checkbox value="Green Card">Green Card</Checkbox>
-              <Checkbox value="Citizen">Citizen</Checkbox>
-            </Checkbox.Group>
+            <Select>
+              <Option value="Green Card">Green Card</Option>
+              <Option value="Citizen">Citizen</Option>
+            </Select>
           </Form.Item>
         </SubInput>
       ) : isCitizen === 'no' ? (
@@ -127,7 +179,7 @@ console.log("Redux user state:", user);
 
           {visaType === 'F1(CPT/OPT)' && (
             <Form.Item label="Upload OPT Receipt">
-              <Upload beforeUpload={(file) => { setOptReceipt(file); return false; }} maxCount={1}> <Button icon={<UploadOutlined />}>Upload</Button> </Upload>
+              <Upload beforeUpload={(file) => { handleOptUpload(file); return false; }} maxCount={1}> <Button icon={<UploadOutlined />}>Upload</Button> </Upload>
             </Form.Item>
           )}
 
@@ -171,10 +223,30 @@ console.log("Redux user state:", user);
       </Form.List>
 
       <Title level={4}>Summary of Uploaded Files</Title>
-      <ul>
-        <li><strong>Profile Picture:</strong> {profilePicture ? profilePicture: 'Not uploaded'}</li>
-        <li><strong>OPT Receipt:</strong> {optReceipt?.name || 'Not uploaded'}</li>
-      </ul>
+
+      {profilePicture ? (
+        <Space style={{ justifyContent: 'space-between', width: '100%' }}>
+          <span><strong>Profile Picture</strong></span>
+          <Space>
+            <a href={profilePicture} target="_blank" rel="noopener noreferrer">Preview</a>
+            <a onClick={() => setProfilePicture('')} style={{ color: 'red' }}>Delete</a>
+          </Space>
+        </Space>
+      ) : (
+        <p>Profile Picture: Not uploaded</p>
+      )}
+
+        {optReceipt ? (
+          <Space style={{ justifyContent: 'space-between', width: '100%', marginTop: '0.5rem' }}>
+            <span><strong>OPT Receipt</strong></span>
+            <Space>
+              <a onClick={() => window.open(URL.createObjectURL(optReceipt))}>Preview</a>
+              <a onClick={() => setOptReceipt(null)} style={{ color: 'red' }}>Delete</a>
+            </Space>
+          </Space>
+        ) : (
+          <p>OPT Receipt: Not uploaded</p>
+        )}
 
       <Form.Item>
         <Button type="primary" htmlType="submit">Submit</Button>

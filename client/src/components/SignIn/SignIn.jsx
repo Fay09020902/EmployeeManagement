@@ -31,7 +31,8 @@ const ResponsiveFooter = styled.div`
 `;
 
 const SignIn = () => {
-  const { error, isAuthenticated, isAdmin } = useSelector((state) => state.user);
+  const { error, isAuthenticated, isAdmin, onboardingStatus } = useSelector((state) => state.user);
+  console.log("current user: ", useSelector((state) => state.user))
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -45,7 +46,11 @@ const SignIn = () => {
       if(isAdmin) {
         navigate('/hr/dashboard');
       } else {
+        if (onboardingStatus === 'Unsubmitted') {
+         navigate('/onboarding');
+        } else {
         navigate("/");
+        }
       }
     }
   }, [isAuthenticated, navigate]);

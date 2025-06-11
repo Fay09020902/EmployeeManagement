@@ -6,12 +6,16 @@ const UserSchema = new mongoose.Schema({
   email:    { type: String, required: true, unique: true },
   password: { type: String, required: true },
   isAdmin:  { type: Boolean, default: false },
-  isVerified: { type: Boolean, default: true }, // token validates email
   avatar: {
     type: String,
     default: function () {
       return gravatar.url(this.email, { s: '200', r: 'pg', d: 'mm' });
     }
+  },
+  onboardingStatus: {
+    type: String,
+    enum: ['Unsubmitted', 'Pending', 'Approved', 'Rejected'],
+    default: 'Unsubmitted'
   }
 }, { timestamps: true });
 
