@@ -9,6 +9,7 @@ const initialState = {
     isAdmin: false,
     onboardingStatus: null,
     error: null,
+    feedback: null
 };
 
 const userSlice = createSlice({
@@ -18,6 +19,7 @@ const userSlice = createSlice({
         setCurrentUser: (state, action) => {
             state.currentUser = action.payload;
             state.isAuthenticated = !!action.payload;
+            state.onboardingStatus = action.payload.onboardingStatus
         },
         clearUser: (state) => {
             localStorage.removeItem("token");

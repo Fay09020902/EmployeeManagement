@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Form, Alert, Input, Select, Button, Typography, DatePicker, Checkbox, Card, Upload, message, Space } from 'antd';
@@ -17,7 +17,7 @@ const SubInput = styled.div`
 
 const OnboardingForm = () => {
   const [form] = Form.useForm();
-  const [isCitizen, setIsCitizen] = useState(null);
+  const [isCitizen, setIsCitizen] = useState(false);
   const [visaType, setVisaType] = useState('');
   const [optReceipt, setOptReceipt] = useState(null);
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
@@ -27,8 +27,25 @@ const OnboardingForm = () => {
   const token = localStorage.getItem('token');
   const onboardingStatus = currentUser?.onboardingStatus;
   const email = currentUser?.email;
+  const feedback = currentUser?.feedback
   const isPending = onboardingStatus === 'Pending'
 
+//   const getallDocuments = async () => {
+//     console.log("documents runs")
+//     try {
+// await fetch(`http://localhost:5000/api/documents/list/${currentUser.id}`, {
+//        headers: { Authorization: `Bearer ${token}` },
+//       });
+//     } catch(err) {
+//    setErr(err.message)
+//     }
+//   }
+
+
+
+  // useEffect(() => {
+  //   getallDocuments();
+  // }, []);
 
 const dispatch = useDispatch();
 
@@ -104,6 +121,14 @@ localStorage.setItem('user', JSON.stringify(updatedUser));
   type="success"
   showIcon
 />)}
+{onboardingStatus === 'Rejected' && (<Alert
+  message="Your application is rejected"
+  description={<>
+  Your onboarding profile is rejected and please review feedback and resubmit
+  <div><b>Feedback:  {feedback}</b></div></>}
+  type="error"
+  showIcon
+/>)}
       <Title level={4}>Basic Info</Title>
       <Form.Item label="Upload Profile Picture (URL)" required>
     <Input
@@ -145,18 +170,19 @@ localStorage.setItem('user', JSON.stringify(updatedUser));
       <Form.Item name="ssn" label="SSN" rules={[{ required: true }]}><Input /></Form.Item>
 
       <Title level={4}>Visa</Title>
-      <Form.Item label="Permanent resident or citizen of the U.S.?" required>
-        <Select value={isCitizen} onChange={(value) => {
-          const isYes = value === 'yes';
+      <Form.Item
+       name={['visa', 'isCitizenOrResident']}
+      label="Permanent resident or citizen of the U.S.?"
+      required>
+        <Select onChange={(value) => {
           setIsCitizen(value);
-          form.setFieldsValue({ visa: { isCitizenOrResident: isYes } });
         }} allowClear>
-          <Option value="yes">Yes</Option>
-          <Option value="no">No</Option>
+          <Option value={true}>Yes</Option>
+          <Option value={false}>No</Option>
         </Select>
       </Form.Item>
 
-      {isCitizen === 'yes' ? (
+      {isCitizen ? (
         <SubInput>
           <Form.Item name={["visa", "citizenType"]} label="Citizen Type">
             <Select>
@@ -165,7 +191,7 @@ localStorage.setItem('user', JSON.stringify(updatedUser));
             </Select>
           </Form.Item>
         </SubInput>
-      ) : isCitizen === 'no' ? (
+      ) : !isCitizen ? (
         <SubInput>
           <Form.Item name={["visa", "visaType"]} label="What is your work authorization?">
             <Select value={visaType || undefined} onChange={(value) => setVisaType(value)} allowClear>

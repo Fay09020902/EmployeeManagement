@@ -41,7 +41,7 @@ exports.getEmployeeProfileById = async (req, res) => {
 };
 
 
-  exports.sendRegistrationLink = async (req, res) => {
+exports.sendRegistrationLink = async (req, res) => {
     const { name, email } = req.body;
 
     try {
@@ -100,4 +100,3 @@ exports.getEmployeeProfileById = async (req, res) => {
       res.status(500).json({ message: 'Failed to reject request' });
     }
   };
-

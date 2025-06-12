@@ -18,6 +18,14 @@ const {
   rejectOnboarding,
 } = require('../controllers/onboarding')
 
+
+const {
+  hrVisaStatusByUserId,
+  hrVisaStatusAll,
+  hrVisaStatusReview,
+  sendReminder
+} = require('../controllers/visa')
+
 // GET /api/hr/invites - HR only
 router.get('/invites', auth, isHR, getInvitesHistory);
 
@@ -34,15 +42,15 @@ router.put('/hiring/application/approve', approveOnboarding);
 router.put('/hiring/application/reject', rejectOnboarding);
 
 
-
+//visa related status
+router.get('/visa-status/:userId',  auth, isHR, hrVisaStatusByUserId);
+router.get('/visa-status/all', auth, isHR, hrVisaStatusAll);
+router.put('/visa-status/review', auth, isHR, hrVisaStatusReview);
+router.put('/visa-status/send-reminder', auth, isHR, sendReminder);
 
 
 router.get('/employees', auth, isHR, getAllEmployeeProfiles)
 router.get('/employees/:id', auth, isHR, getEmployeeProfileById)
 
-
-
-// router.put('/access-requests/:id/approve', auth, isHR, approveAccessRequest);
-// router.put('/access-requests/:id/reject', auth, isHR, rejectAccessRequest);
 
 module.exports = router;

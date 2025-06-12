@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const EmployeeProfile = require('../models/EmployeeProfile');
-
+const Document = require('../models/Document');
 
 // GET all onboarding applications by status
 exports.getApplicationsByStatus = async (req, res) => {
@@ -17,7 +17,6 @@ exports.getApplicationsByStatus = async (req, res) => {
       fullName: profile ? `${profile.firstName} ${profile.lastName}` : '',
       email: u.email,
       status: u.onboardingStatus,
-      profile: profile
     };
   });
 
@@ -26,7 +25,6 @@ exports.getApplicationsByStatus = async (req, res) => {
     catch(err){
        res.status(500).json({ message: err });
     }
-
 };
 
 exports.getApplicationByUserId = async (req, res) => {
@@ -36,7 +34,7 @@ exports.getApplicationByUserId = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const profile = await EmployeeProfile.findOne({ userId });
+    const profile = await EmployeeProfile.findOne({ userId }).populate('documents');
 
     res.status(200).json({
       userId: user._id,
@@ -56,6 +54,11 @@ exports.getApplicationByUserId = async (req, res) => {
 exports.approveOnboarding = async (req, res) => {
   try {
     const { userId } = req.body;
+
+    await Document.updateMany(
+      { userId, type: 'opt_receipt', status: 'pending' },
+      { $set: { status: 'approved' } }
+    );
     const user = await User.findByIdAndUpdate(
       userId,
       { onboardingStatus: 'Approved', feedback: '' },

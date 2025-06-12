@@ -7,6 +7,7 @@ import ForgetPassword from "./components/SignIn/ForgotPassword";
 import Layout from "./components/Layout";
 import OnboardingForm from "./components/OnboardingForm";
 import HRDashboard from "./components/HRDashboard/HRDashboard";
+import ViewApplicationPage from "./components/HRDashboard/ViewApplication";
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentUser } from './features/user';
 
@@ -36,6 +37,7 @@ function App() {
         <Route path='/hr/dashboard' element={<HRDashboard />} />
         <Route path="/forget-password" element={<ForgetPassword />} />
         <Route path='/update-password/:token' element={<UpdatePassword />} />
+        <Route path='/hr/view-application/:userId' element={<ViewApplicationPage />} />
         </Route>
       </Routes>
   ): (

@@ -15,10 +15,6 @@ registerUser,
   updatePassword
 } = require('../controllers/user');
 
-// const auth = require('../middlewares/auth');     // JWT auth middleware
-// const isHR = require('../middlewares/isHR');     // role check middleware (HR only)
-// const canEditSelf = require('../middlewares/canEditSelf'); // optional: user can only edit their own info
-
 router.get('/', async (req, res) => {
     try {
         const users = await User.find()

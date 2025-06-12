@@ -1,7 +1,8 @@
 const EmployeeProfile = require('../models/EmployeeProfile');
 const User = require('../models/User')
+const Document = require('../models/Document');
 const multer = require('multer');
-const storage = multer.memoryStorage(); 
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 exports.getProfile = async (req, res) => {
@@ -27,6 +28,9 @@ exports.submitProfile = async (req, res) => {
      await User.findByIdAndUpdate(userId, {
       onboardingStatus: 'Pending',
     });
+
+    const docs = await Document.find({ userId });
+    profile.documents = docs.map(doc => doc._id);
 
     res.status(200).json({ message: 'Profile saved successfully', profile });
   } catch (err) {

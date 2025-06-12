@@ -138,7 +138,8 @@ exports.loginUser = async (req, res) => {
         email: user.email,
         isAdmin: user.isAdmin,
         avatar: user.avatar,
-        onboardingStatus: user.onboardingStatus
+        onboardingStatus: user.onboardingStatus,
+        feedback: user.feedback
       },
       expiresIn: 3600
     });

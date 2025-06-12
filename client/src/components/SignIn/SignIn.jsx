@@ -41,12 +41,11 @@ const SignIn = () => {
   }, [dispatch]);
 
   useEffect(() => {
-
     if (isAuthenticated) {
       if(isAdmin) {
         navigate('/hr/dashboard');
       } else {
-        if (onboardingStatus === 'Unsubmitted') {
+        if (onboardingStatus === 'Unsubmitted' || onboardingStatus === 'Rejected' ) {
          navigate('/onboarding');
         } else {
         navigate("/");
